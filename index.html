@@ -4,22 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/style.css">
     <title>Physics Project</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;700&display=swap');
+    </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><i class="fa-solid fa-house"></i></a>
+                <a class="navbar-brand" href="/index.html"><i class="fa-solid fa-house"></i></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-link active" aria-current="page" href="#"><i class="fa-solid fa-house"></i> Home</a>
-                        <a class="nav-link" href="#">Features</a>
-                        <a class="nav-link" href="#">Pricing</a>
+                        <a class="nav-link" href="#">Exemple 1</a>
+                        <a class="nav-link" href="#">Exemple 2</a>
+                        <a class="nav-link" href="#">Exemple 3</a>
                     </div>
                 </div>
             </div>
@@ -27,48 +34,48 @@
     </header> 
     <main>
         <article>
-            <h2>Mișcarea rectilinie uniform variată. Accelerația</h2>
-            <section>
-                <canvas id="firstC"></canvas>
-                <div class="variables" id="variables_first">
+            <h2 class="mb-3">Mișcarea rectilinie uniform variată. Accelerația.</h2>
+            <canvas id="firstC"></canvas>
+            <section class="buttons_sections position-relative mb-3">
+                <button title="settings" class="left control-buttons" id="first_settings"><i class="fa-solid fa-gear"></i></button>
+                <button title="-1s" id="first_left" class="control-buttons"><i class="fa-solid fa-arrow-left"></i></button>
+                <button title="pause/play" id="first_pause" class="control-buttons"><i class="fa-solid fa-play"></i></button> <!-- <i class="fa-solid fa-pause"></i> -->
+                <button title="+1s" id="first_right" class="control-buttons"><i class="fa-solid fa-arrow-right"></i></button>
+                <button class="right control-buttons" title="expand/compress" id="first_scale"><i class="fa-solid fa-expand"></i></button> <!-- <i class="fa-solid fa-compress"></i> -->
+            </section>
+            <div class="variables" id="variables_first">
 
-                </div>
-            </section>
-            <section class="buttons_sections">
-                <button id="first_left" class="contorl-buttons"><i class="fa-solid fa-arrow-left"></i></button>
-                <button id="first_pause" class="contorl-buttons"><i class="fa-solid fa-play"></i></button> <!-- <i class="fa-solid fa-pause"></i> -->
-                <button id="first_right" class="contorl-buttons"><i class="fa-solid fa-arrow-right"></i></button>
-            </section>
+            </div>
             <a href="#" class="exemple_links">Exemple <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
         </article>
         <article>
-            <h2>Mișcarea corpului pe verticală</h2>
-            <section>
-                <canvas id="secondC"></canvas>
-                <div class="variables" id="variables_second">
+            <h2 class="mb-3">Mișcarea corpului pe verticală.</h2>
+            <canvas id="secondC"></canvas>
+            <section class="buttons_sections position-relative mb-3">
+                <button title="settings" class="left control-buttons" id="second_settings"><i class="fa-solid fa-gear"></i></button>
+                <button title="-1s" id="second_left" class="control-buttons"><i class="fa-solid fa-arrow-left"></i></button>
+                <button title="pause/play" id="second_pause" class="control-buttons"><i class="fa-solid fa-play"></i></button> <!-- <i class="fa-solid fa-pause"></i> -->
+                <button title="+1s" id="second_right" class="control-buttons"><i class="fa-solid fa-arrow-right"></i></button>
+                <button class="right" title="expand/compress" id="second_scale"><i class="fa-solid fa-expand"></i></button> <!-- <i class="fa-solid fa-compress"></i> -->
+            </section>
+            <div class="variables" id="variables_second">
 
-                </div>
-            </section>
-            <section class="buttons_sections">
-                <button id="second_left" class="contorl-buttons"><i class="fa-solid fa-arrow-left"></i></button>
-                <button id="second_pause" class="contorl-buttons"><i class="fa-solid fa-play"></i></button> <!-- <i class="fa-solid fa-pause"></i> -->
-                <button id="second_right" class="contorl-buttons"><i class="fa-solid fa-arrow-right"></i></button>
-            </section>
+            </div>
             <a href="#" class="exemple_links">Exemple <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
         </article>
         <article>
-            <h2>Mișcarea circulară uniformă. Accelerația centripetă</h2>
-            <section>
-                <canvas id="thirdC"></canvas>
-                <div class="variables" id="variables_third">
+            <h2 class="mb-3">Mișcarea circulară uniformă. Accelerația centripetă.</h2>
+            <canvas id="thirdC"></canvas>
+            <section class="buttons_sections position-relative mb-3">
+                <button title="settings" class="left control-buttons" id="third_settings"><i class="fa-solid fa-gear"></i></button>
+                <button title="-1s" id="third_left" class="control-buttons"><i class="fa-solid fa-arrow-left"></i></button>
+                <button title="pause/play" id="third_pause" class="control-buttons"><i class="fa-solid fa-play"></i></button> <!-- <i class="fa-solid fa-pause"></i> -->
+                <button title="+1s" id="third_right" class="control-buttons"><i class="fa-solid fa-arrow-right"></i></button>
+                <button class="right" title="expand/compress" id="third_scale"><i class="fa-solid fa-expand"></i></button> <!-- <i class="fa-solid fa-compress"></i> -->
+            </section>
+            <div class="variables" id="variables_third">
 
-                </div>
-            </section>
-            <section class="buttons_sections">
-                <button id="third_left" class="contorl-buttons"><i class="fa-solid fa-arrow-left"></i></button>
-                <button id="third_pause" class="contorl-buttons"><i class="fa-solid fa-play"></i></button> <!-- <i class="fa-solid fa-pause"></i> -->
-                <button id="third_right" class="contorl-buttons"><i class="fa-solid fa-arrow-right"></i></button>
-            </section>
+            </div>
             <a href="#" class="exemple_links">Exemple <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
         </article>
     </main>
