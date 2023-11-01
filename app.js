@@ -92,6 +92,23 @@ const sliderConfig = {
     },
 };
 
+const ball = {
+    isFalling: false,
+    x: balloon.x + 20,
+    y: balloon.y + 20,
+    size: 20,
+    color: 'black',
+    vx: balloon.vx,
+    vy: balloon.vy,
+}
+
+const origin = {
+    x: canvas.width / 2,
+    y: canvas.height - groundHeight,
+    size: 20,
+    color: 'white',
+}
+
 // Animation 
 function animate() {
     requestAnimationFrame(animate);
@@ -117,16 +134,65 @@ function animate() {
     c.fillRect(0, cameraY, canvas.width, groundHeight);
 
     // Draw the objects with adjusted positions based on the camera's position
-    drawRec({ x: balloon.x % canvas.width, y: balloon.y + cameraY, width: balloon.width, height: balloon.height, color: balloon.color });
+    drawRec({
+        x: balloon.x > 0 ? balloon.x % canvas.width : canvas.width - (Math.abs(balloon.x) % canvas.width),
+        y: balloon.y + cameraY,
+        width: balloon.width,
+        height: balloon.height,
+        color: balloon.color
+    });
+
+    drawCirle({
+        x: ball.x > 0 ? ball.x % canvas.width : canvas.width - (Math.abs(ball.x) % canvas.width),
+        y: ball.y + cameraY,
+        size: ball.size,
+        color: ball.color
+    })
+
     drawContainer(sliderConfig.container);
     drawContainer(sliderConfig.horizontal);
 
+    // drawCirle({ x: origin.x, y: cameraY, size: origin.size, color: origin.color })
+
     updateBalloonPosition();
+    if (ball.isFalling) {
+        updateBalloonPosition();
+    }
 }
 
 animate();
 
 // Functions 
+
+function updateBalloonPosition() {
+    ball.x += ball.vx
+    ball.y += ball.vy + g
+}
+
+function touchingBall(object) {
+    let x = object.x > 0 ? object.x % canvas.width : Math.abs(object.x) % canvas.width;
+    let y = canvas.height - Math.abs(object.y) % canvas.height - object.height
+
+
+    if (
+        mouse.x > x - 10 && mouse.x < x + object.width + 10 &&
+        mouse.y > y - 10 && mouse.y < y + object.height + 10
+    ) {
+        console.log(x);
+        console.log(y);
+        return true
+    }
+    return false
+}
+
+function calculateDistance(point1, point2) {
+    // const dx = point2.x - point1.x;
+    // const dy = point2.y - point1.y;
+    // return Math.sqrt(dx * dx + dy * dy);
+    return Math.abs(point2.x) - Math.abs(point1.x);
+}
+
+
 function updateBalloonPosition() {
     balloon.vy = -parseFloat(sliderConfig.container.value);
     balloon.vy += g;
@@ -134,11 +200,11 @@ function updateBalloonPosition() {
         balloon.y = -50;
         sliderConfig.container.slider.x = canvas.width - 10 - 100;
         sliderConfig.container.value = 1;
-        sliderConfig.container.text.text = "Vy a balonului: 1.00"
+        sliderConfig.container.text.text = "Vy a balonului: 0.00"
 
         sliderConfig.horizontal.slider.x = canvas.width - 10 - 100;
         sliderConfig.horizontal.value = 0;
-        sliderConfig.horizontal.text.text = "Vy a balonului: 0.00"
+        sliderConfig.horizontal.text.text = "Vx a balonului: 0.00"
     } else {
         balloon.y += balloon.vy;
     }
@@ -146,6 +212,13 @@ function updateBalloonPosition() {
     if (balloon.y < -50) {
         balloon.vx = parseFloat(sliderConfig.horizontal.value)
         balloon.x += balloon.vx;
+    }
+
+    if (!ball.isFalling) {
+        ball.x = balloon.x + 25
+        ball.y = balloon.y + 15
+        ball.vx = balloon.vx
+        ball.vy = balloon.vy
     }
 }
 
@@ -174,6 +247,7 @@ function drawCirle(circle) {
     c.arc(circle.x, circle.y, circle.size / 2, 0, Math.PI * 2, false);
     c.fillStyle = circle.color;
     c.fill();
+    c.closePath()
 }
 
 function drawRec(object) {
@@ -243,6 +317,8 @@ canvas.addEventListener("mousemove", () => {
             sliderConfig.horizontal.slider.x = mouse.x;
         }
         calculateValue(sliderConfig.horizontal, 'x');
+    } else if (touchingBall(balloon) && mouse.isMouseDown) {
+        ball.isFalling = true;
     }
 });
 
