@@ -447,7 +447,7 @@ function lerp(value, inMin, inMax, outMin, outMax) {
 function calculateValue(container, axis) {
     const axisLabel = axis === "x" ? "x" : "y";
     container.value = lerp(container.slider.x, container.min, container.max, container.minValue, container.maxValue).toFixed(2);
-    container.text.text = `V${axisLabel} a balonului: ${container.value}`;
+    container.text.text = "V"+axisLabel+" a balonului: "+container.value;
 }
 
 // Event Listeners
