@@ -313,8 +313,8 @@ else {
 }
     
     const speed = - -(ball.vx).toFixed(2);
-    sliderConfig.stats.text1.text = `Vx a mingii: ${speed}`
-    sliderConfig.stats.text2.text = `Înălțimea: ${height}`
+    sliderConfig.stats.text1.text = "Vx a mingii: " + speed;
+    sliderConfig.stats.text2.text = "Înălțimea: " + height;
 }
 
 function createRandomCloud() {
