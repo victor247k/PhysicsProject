@@ -164,7 +164,7 @@ const clouds = [];
 
 // Images
 const grassImage = new Image();
-grassImage.src = './PhisicsProject/images/grass.jpg';
+grassImage.src = './PhysicsProject/images/grass.jpg';
 
 const balloonImage = new Image();
 balloonImage.src = `./PysicsProject/images/balloon.png'
