@@ -303,7 +303,14 @@ animate();
 
 
 function updateStats() {
-    const height = -(ball.y).toFixed(2);
+let height = 0;
+if (ball.isFalling) {
+ height = -(ball.y).toFixed(2);
+}
+else {
+    height = -(balloon.y).toFixed(2);
+}
+    
     const speed = - -(ball.vx).toFixed(2);
     sliderConfig.stats.text1.text = `Vx a mingii: ${speed}`
     sliderConfig.stats.text2.text = `Înălțimea: ${height}`
