@@ -17,13 +17,12 @@ const mouse = {
 };
 
 const balloon = {
-    x: canvas.width / 2 - 25,
-    y: -50,
+    x: canvas.width / 2 - 100,
+    y: -100,
     vx: 0,
     vy: 0,
-    width: 50,
-    height: 50,
-    color: 'orange',
+    width: 64,
+    height: 100,
     vspeed: 0,
 };
 
@@ -113,10 +112,31 @@ const sliderConfig = {
         },
         bar: {
             x: canvas.width - 200 + 20,
-            y: 40 + 15 + 50 + 70,
+            y: 175,
             width: 200 - 60,
             height: 20,
             color: 'gray',
+        },
+    },
+    stats: {
+        width: 200,
+        height: 50,
+        x: canvas.width - 200 - 10,
+        y: 10 + 30 + 60 + 60 + 60,
+        color: 'lightgray',
+        text1: {
+            x: canvas.width - 190 - 10,
+            y: 210 + 30 - 5,
+            text: "Viteza mingii: ",
+            font: "bold 14px Ubuntu",
+            color: "black",
+        },
+        text2: {
+            x: canvas.width - 190 - 10,
+            y: 210 + 30 + 20,
+            text: "Înălțimea: ",
+            font: "bold 14px Ubuntu",
+            color: "black",
         },
     },
 };
@@ -125,8 +145,8 @@ const ball = {
     isFalling: false,
     x: balloon.x + balloon.width / 2,
     y: balloon.y + balloon.height,
-    size: 10,
-    color: 'black',
+    size: 15,
+    color: '#FFA500',
     vx: balloon.vx,
     vy: balloon.vy,
     dropped: false,
@@ -136,6 +156,18 @@ const ball = {
 let cameraY = 0;
 let lastTimestamp = 0;
 let time = 0;
+let lastCloudTimestamp = 0;
+
+
+const clouds = [];
+
+
+// Images
+const grassImage = new Image();
+grassImage.src = '/images/grass.jpg';
+
+const balloonImage = new Image();
+balloonImage.src = '/images/balloon.png'
 
 // Animation 
 function animate(timestamp) {
@@ -166,18 +198,47 @@ function animate(timestamp) {
     c.fillStyle = "lightblue";
     c.fillRect(0, 0, canvas.width, cameraY);
 
+    // Draw the clouds
+
+    // Create a new cloud every 2 seconds
+    if (timestamp - lastCloudTimestamp > 2000) {
+        clouds.push(createRandomCloud());
+        lastCloudTimestamp = timestamp;
+    }
+
+    // Draw the clouds
+    clouds.forEach(cloud => {
+        cloud.x -= 20 * deltaTime; // Horizontal movement
+        if (cloud.x + cloud.size < 0) {
+            // If the cloud goes off-screen, remove it
+            clouds.splice(clouds.indexOf(cloud), 1);
+        }
+        drawCloud(cloud, cameraY);
+    });
+
+
+    clouds.forEach(cloud => {
+        cloud.x -= 20 * deltaTime; // Horizontal movement
+        if (cloud.x + cloud.size < 0) {
+            // If the cloud goes off-screen, reset its position
+            cloud.x = canvas.width;
+            cloud.y = Math.random() * (canvas.height - groundHeight - 100);
+        }
+        drawCloud(cloud, cameraY);
+    });
+
+
     // Draw the grass
-    c.fillStyle = "green";
-    c.fillRect(0, cameraY, canvas.width, groundHeight);
+    c.drawImage(grassImage, 0, cameraY, canvas.width, groundHeight)
 
     // Draw the objects with adjusted positions based on the camera's position
-    drawRec({
-        x: balloon.x > 0 ? balloon.x % canvas.width : canvas.width - (Math.abs(balloon.x) % canvas.width),
-        y: balloon.y + cameraY,
-        width: balloon.width,
-        height: balloon.height,
-        color: balloon.color
-    });
+    c.drawImage(
+        balloonImage,
+        balloon.x > 0 ? balloon.x % canvas.width : canvas.width - (Math.abs(balloon.x) % canvas.width),
+        balloon.y + cameraY,
+        balloon.width,
+        balloon.height,
+    );
 
     if (ball.isFalling) {
         if (ball.dropped) {
@@ -225,6 +286,12 @@ function animate(timestamp) {
     drawContainer(sliderConfig.container);
     drawContainer(sliderConfig.horizontal);
     drawContainer(sliderConfig.drop)
+    drawContainer(sliderConfig.stats)
+
+drawText(sliderConfig.stats.text1);
+drawText(sliderConfig.stats.text2);
+
+    updateStats();
 
     updateBalloonPosition();
 
@@ -233,6 +300,38 @@ function animate(timestamp) {
 animate();
 
 // Functions 
+
+
+function updateStats() {
+    const height = -(ball.y).toFixed(2);
+    const speed = - -(ball.vx).toFixed(2);
+    sliderConfig.stats.text1.text = `Vx a mingii: ${speed}`
+    sliderConfig.stats.text2.text = `Înălțimea: ${height}`
+}
+
+function createRandomCloud() {
+    const cloudSize = Math.random() * 40 + 20; // Random size between 20 and 60
+    const cloudX = canvas.width + cloudSize; // Start the clouds just off the right edge of the canvas
+    const cloudY = Math.random() * (canvas.height - groundHeight - 100); // Random vertical position
+    const cloudColor = 'white';
+
+    return { x: cloudX, y: cloudY, size: cloudSize, color: cloudColor };
+}
+
+// Create initial clouds
+for (let i = 0; i < 5; i++) {
+    clouds.push(createRandomCloud());
+}
+
+
+
+function drawCloud(cloud, cameraY) {
+    c.beginPath();
+    c.arc(cloud.x, cloud.y + cameraY, cloud.size, 0, Math.PI * 2);
+    c.fillStyle = cloud.color;
+    c.fill();
+    c.closePath();
+}
 
 
 function touchingBall(object) {
@@ -270,8 +369,8 @@ function updateBalloonPosition() {
     balloon.vy += g;
 
     // Check if balloon reaches top and reset
-    if (balloon.y >= -55 && balloon.vy > 0) {
-        balloon.y = -50;
+    if (balloon.y >= -100 && balloon.vy > 0) {
+        balloon.y = -100;
         sliderConfig.container.slider.x = canvas.width - 10 - 100;
         sliderConfig.container.value = 1;
         sliderConfig.container.text.text = "Vy a balonului: 0.00";
@@ -386,7 +485,6 @@ canvas.addEventListener('mousemove', () => {
     } else if (touchingRectangle(sliderConfig.drop.bar) && mouse.isMouseDown && !ball.isFalling) {
         ball.dropped = true
         ball.isFalling = true
-        console.log('clicked')
     }
 });
 
@@ -397,5 +495,52 @@ canvas.addEventListener('dblclick', () => {
     } else if (touchingObject(sliderConfig.horizontal.slider)) {
         sliderConfig.horizontal.slider.x = canvas.width - 100 - 10;
         calculateValue(sliderConfig.horizontal, 'x');
+    }
+});
+
+canvas.addEventListener('touchmove', (e) => {
+    // Get the first touch position
+    const touch = e.touches[0];
+    mouse.x = touch.clientX;
+    mouse.y = touch.clientY;
+});
+
+// Add a touchstart event listener
+canvas.addEventListener('touchstart', function(e) {
+    mouse.isMouseDown = true;
+    // You can do something when the touch starts, e.g., start drawing.
+});
+
+// Add a touchend event listener
+canvas.addEventListener('touchend', function(e) {
+    mouse.isMouseDown = false;
+    // You can do something when the touch ends, e.g., stop drawing.
+});
+
+canvas.addEventListener('touchmove', () => {
+    if (touchingObject(sliderConfig.container.slider) && mouse.isMouseDown) {
+        if (sliderConfig.container.slider.x > sliderConfig.container.max + 5) {
+            sliderConfig.container.slider.x = sliderConfig.container.max;
+        } else if (sliderConfig.container.slider.x < sliderConfig.container.min - 5) {
+            sliderConfig.container.slider.x = sliderConfig.container.min;
+        } else {
+            sliderConfig.container.slider.x = mouse.x;
+        }
+        calculateValue(sliderConfig.container, 'y');
+    } else if (touchingObject(sliderConfig.horizontal.slider) && mouse.isMouseDown) {
+        if (sliderConfig.horizontal.slider.x > sliderConfig.horizontal.max + 5) {
+            sliderConfig.horizontal.slider.x = sliderConfig.horizontal.max;
+        } else if (sliderConfig.horizontal.slider.x < sliderConfig.horizontal.min - 5) {
+            sliderConfig.horizontal.slider.x = sliderConfig.horizontal.min;
+        } else {
+            sliderConfig.horizontal.slider.x = mouse.x;
+        }
+        calculateValue(sliderConfig.horizontal, 'x');
+    } else if (!ball.isFalling && touchingBall(balloon) && mouse.isMouseDown) {
+        ball.dropped = true;
+        ball.isFalling = true;
+    } else if (touchingRectangle(sliderConfig.drop.bar) && mouse.isMouseDown && !ball.isFalling) {
+        ball.dropped = true;
+        ball.isFalling = true;
     }
 });
