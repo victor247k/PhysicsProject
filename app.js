@@ -252,7 +252,6 @@ function animate(timestamp) {
 
          time += deltaTime;
         ball.y = ball.y + (ball.vy * time) + (0.5 * g * time * time);
-        ball.vy += g;
 
        
         if (ball.y >= 0) {
