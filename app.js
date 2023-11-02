@@ -5,7 +5,9 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const groundHeight = 50;
-const g = 1;
+const g = 1; // Adjusted gravity for a more realistic feel
+const airResistance = 0.01; // Added air resistance
+const wind = 0.05; // Horizontal wind affecting the balloon
 
 // Objects
 const mouse = {
@@ -15,7 +17,7 @@ const mouse = {
 };
 
 const balloon = {
-    x: 200,
+    x: canvas.width / 2 - 25,
     y: -50,
     vx: 0,
     vy: 0,
@@ -90,36 +92,71 @@ const sliderConfig = {
         minValue: -5,
         maxValue: 5,
     },
+    drop: {
+        width: 200,
+        height: 50,
+        x: canvas.width - 200 - 10,
+        y: 10 + 30 + 50 + 60,
+        color: 'lightgray',
+        text: {
+            x: canvas.width - 190 - 10,
+            y: 25 + 20 + 50 + 70,
+            text: "Aruncă mingea",
+            font: "bold 14px Ubuntu",
+            color: "black",
+        },
+        slider: {
+            x: canvas.width - 190 - 10 + 90,
+            y: 25 + 50 + 60 + 50,
+            size: 0,
+            color: 'blue',
+        },
+        bar: {
+            x: canvas.width - 200 + 20,
+            y: 40 + 15 + 50 + 70,
+            width: 200 - 60,
+            height: 20,
+            color: 'gray',
+        },
+    },
 };
 
 const ball = {
     isFalling: false,
-    x: balloon.x + 20,
-    y: balloon.y + 20,
-    size: 20,
+    x: balloon.x + balloon.width / 2,
+    y: balloon.y + balloon.height,
+    size: 10,
     color: 'black',
     vx: balloon.vx,
     vy: balloon.vy,
+    dropped: false,
+    bounceFactor: -0.6, // Added bounce effect
 }
 
-const origin = {
-    x: canvas.width / 2,
-    y: canvas.height - groundHeight,
-    size: 20,
-    color: 'white',
-}
+let cameraY = 0;
+let lastTimestamp = 0;
+let time = 0;
 
 // Animation 
-function animate() {
+function animate(timestamp) {
     requestAnimationFrame(animate);
 
+    if (!lastTimestamp) {
+        lastTimestamp = timestamp;
+    }
+    const deltaTime = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+
     // Calculate the camera's position based on the balloon's position
-    let cameraY = canvas.height / 2 - balloon.y;
+    if (!ball.isFalling) {
+        cameraY = canvas.height / 2 - balloon.y;
+    } else {
+        cameraY = canvas.height / 2 - ball.y;
+    }
 
     // Define a minimum camera position to stop following the balloon
     const minCameraY = canvas.height - groundHeight;
-
-    // Ensure the camera position doesn't go below the minimum
     cameraY = Math.max(cameraY, minCameraY);
 
     // Clear the canvas
@@ -142,91 +179,122 @@ function animate() {
         color: balloon.color
     });
 
-    drawCirle({
-        x: ball.x > 0 ? ball.x % canvas.width : canvas.width - (Math.abs(ball.x) % canvas.width),
-        y: ball.y + cameraY,
-        size: ball.size,
-        color: ball.color
-    })
+    if (ball.isFalling) {
+        if (ball.dropped) {
+            ball.x = balloon.x + balloon.width / 2
+            ball.y = balloon.y + 10
+            ball.vy = 0
+            ball.vx = balloon.vx
+            ball.dropped = false
+            time = 0
+        }
+
+         time += deltaTime;
+        ball.y = ball.y + (ball.vy * time) + (0.5 * g * time * time);
+
+       
+        if (ball.y >= 0) {
+            ball.y = 0
+            ball.vx = 0
+        drawCirle({
+            x: ball.x > 0 ? ball.x % canvas.width : canvas.width - (Math.abs(ball.x) % canvas.width),
+            y: ball.y + canvas.height - groundHeight,
+            size: ball.size,
+            color: ball.color
+        })
+        } else {
+        drawCirle({
+            x: ball.x > 0 ? ball.x % canvas.width : canvas.width - (Math.abs(ball.x) % canvas.width),
+            y: ball.y + cameraY,
+            size: ball.size,
+            color: ball.color
+        })
+        }
+
+        // Apply air resistance
+        ball.vx -= airResistance * ball.vx;
+
+        ball.x += ball.vx;
+        
+        if (Math.abs(ball.vx) < 0.01) {
+            ball.vx = 0;
+        }
+    }
+    
 
     drawContainer(sliderConfig.container);
     drawContainer(sliderConfig.horizontal);
-
-    // drawCirle({ x: origin.x, y: cameraY, size: origin.size, color: origin.color })
+    drawContainer(sliderConfig.drop)
 
     updateBalloonPosition();
-    if (ball.isFalling) {
-        updateBalloonPosition();
-    }
+
 }
 
 animate();
 
 // Functions 
 
-function updateBalloonPosition() {
-    ball.x += ball.vx
-    ball.y += ball.vy + g
-}
 
 function touchingBall(object) {
-    let x = object.x > 0 ? object.x % canvas.width : Math.abs(object.x) % canvas.width;
-    let y = canvas.height - Math.abs(object.y) % canvas.height - object.height
-
+    const x = object.x;
+    const y = (object.y + cameraY);
 
     if (
-        mouse.x > x - 10 && mouse.x < x + object.width + 10 &&
-        mouse.y > y - 10 && mouse.y < y + object.height + 10
+        mouse.x > x &&
+        mouse.x < x + object.width &&
+        mouse.y > y &&
+        mouse.y < y + object.height
     ) {
-        console.log(x);
-        console.log(y);
+        return true;
+    }
+    return false;
+}
+
+function touchingRectangle(object) {
+    if (mouse.x > object.x - 10 && 
+        mouse.x < object.x + object.width + 10 && 
+        mouse.y > object.y -10 && 
+        mouse.y < object.y + object.height + 10) 
+    {
         return true
     }
     return false
 }
 
-function calculateDistance(point1, point2) {
-    // const dx = point2.x - point1.x;
-    // const dy = point2.y - point1.y;
-    // return Math.sqrt(dx * dx + dy * dy);
-    return Math.abs(point2.x) - Math.abs(point1.x);
-}
-
-
 function updateBalloonPosition() {
+    // Update balloon velocity based on sliders
     balloon.vy = -parseFloat(sliderConfig.container.value);
+    balloon.vx = parseFloat(sliderConfig.horizontal.value);
+
+    // Apply gravity
     balloon.vy += g;
+
+    // Check if balloon reaches top and reset
     if (balloon.y >= -55 && balloon.vy > 0) {
         balloon.y = -50;
         sliderConfig.container.slider.x = canvas.width - 10 - 100;
         sliderConfig.container.value = 1;
-        sliderConfig.container.text.text = "Vy a balonului: 0.00"
+        sliderConfig.container.text.text = "Vy a balonului: 0.00";
 
         sliderConfig.horizontal.slider.x = canvas.width - 10 - 100;
         sliderConfig.horizontal.value = 0;
-        sliderConfig.horizontal.text.text = "Vx a balonului: 0.00"
+        sliderConfig.horizontal.text.text = "Vx a balonului: 0.00";
     } else {
         balloon.y += balloon.vy;
-    }
-
-    if (balloon.y < -50) {
-        balloon.vx = parseFloat(sliderConfig.horizontal.value)
         balloon.x += balloon.vx;
-    }
-
-    if (!ball.isFalling) {
-        ball.x = balloon.x + 25
-        ball.y = balloon.y + 15
-        ball.vx = balloon.vx
-        ball.vy = balloon.vy
     }
 }
 
 function drawContainer(container) {
-    drawRec(container);
-    drawRec(container.bar);
-    drawCirle(container.slider);
-    drawText(container.text);
+    try {
+        drawRec(container);
+        drawRec(container.bar);
+        drawCirle(container.slider);
+        drawText(container.text);  
+    } catch (error) {
+        
+    }
+    
 }
 
 function touchingObject(object) {
@@ -264,13 +332,8 @@ function drawText(object) {
 }
 
 function lerp(value, inMin, inMax, outMin, outMax) {
-    // Ensure the value is within the input range
     value = Math.min(Math.max(value, inMin), inMax);
-
-    // Calculate the normalized position within the input range
     const normalized = (value - inMin) / (inMax - inMin);
-
-    // Calculate the output value within the output range
     return outMin + normalized * (outMax - outMin);
 }
 
@@ -298,7 +361,7 @@ canvas.addEventListener('mouseup', function(e) {
     // You can do something when the mouse button is released, e.g., stop drawing.
 });
 
-canvas.addEventListener("mousemove", () => {
+canvas.addEventListener('mousemove', () => {
     if (touchingObject(sliderConfig.container.slider) && mouse.isMouseDown) {
         if (sliderConfig.container.slider.x > sliderConfig.container.max + 5) {
             sliderConfig.container.slider.x = sliderConfig.container.max;
@@ -317,8 +380,13 @@ canvas.addEventListener("mousemove", () => {
             sliderConfig.horizontal.slider.x = mouse.x;
         }
         calculateValue(sliderConfig.horizontal, 'x');
-    } else if (touchingBall(balloon) && mouse.isMouseDown) {
+    } else if (!ball.isFalling && touchingBall(balloon) && mouse.isMouseDown) {
+        ball.dropped = true
         ball.isFalling = true;
+    } else if (touchingRectangle(sliderConfig.drop.bar) && mouse.isMouseDown && !ball.isFalling) {
+        ball.dropped = true
+        ball.isFalling = true
+        console.log('clicked')
     }
 });
 
