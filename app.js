@@ -164,10 +164,10 @@ const clouds = [];
 
 // Images
 const grassImage = new Image();
-grassImage.src = '/images/grass.jpg';
+grassImage.src = 'images/grass.jpg';
 
 const balloonImage = new Image();
-balloonImage.src = '/images/balloon.png'
+balloonImage.src = 'images/balloon.png'
 
 // Animation 
 function animate(timestamp) {
